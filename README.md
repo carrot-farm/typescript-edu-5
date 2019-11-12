@@ -1,44 +1,72 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Typescript & React Hooks
+* useState, useReducer, useRef 사용하기.
 
-## Available Scripts
 
-In the project directory, you can run:
 
-### `yarn start`
+## 참고
+[velopert](https://velog.io/@velopert/using-hooks-with-typescript)
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
 
-### `yarn test`
+## useState 사용시 타입 정의
+* 제네릭을 사용하지 않아도 타입 유추를 한다.
+```typescript
+const [count, setCount] = useState<number>(0);
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* 사실 타입을 표기하지 않아도 무관하다.
+```typescript
+const [count, setCount] = useState(0);
 
-### `yarn build`
+```
+* 제네릭을 사용하면 좋을 때는 다음과 같이 null 이거나 혹은 아닐때 사용하면 좋다.
+```typescript
+type Information = { name: string, description: string };
+const [info, setInformation] = useState<Information | null>(null);
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* 혹은 상태의 타입이 까다로운 구조를 가진 객체이거나 배열일 때는 제네릭을 명시하는 것이 좋다.
+```typescript
+type Todo = { id: number; text: string; done: boolean };
+const [todos, setTodos] = useState<Todo[]>([]);
+```
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+* 배열일 경우도 빈 배열만 넣을 경우는 배열이 어떤 타입으로 이루어져 있는지 알수 없으므로 명시하는 것이 좋다.
+```typescript
+type Todo = { id: number; text: string; done: boolean };
+const [todos, setTodos] = useState<Todo[]>([]);
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `yarn eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## useRef
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+* **용도**
+   * 리액트 컴포넌트 내에서 외부 라이브러리의 인스턴스 혹은 DOM을 특정 값안에 담을 때 사용
+   * 단, 이 값은 랜더링과 관계가 없어야 한다.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+* **변수값 관리하기**
+```typescript
+const id = useRef<number>(0);
+const increaseId = () => {
+  id.current += 1;
+}
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+* **DOM 관리하기**
+   * 초기값은 `null` 로 설정.
+   * 사용전 `ref.current`의 값을 사용하려면 `null`을 체킹 해줘야 한다.
+   * `./src/MyForm.tsx` 참고.
+```typescript
+import React, { useRef } from 'react';
+//...
+const inputRef = useRef<HTMLInputElement>(null);
+//...
+return (
+  <>
+    //...
+    <input name="name" value={name} onChange={onChange} ref={inputRef} />
+    //...
+  </>
+)
+```
